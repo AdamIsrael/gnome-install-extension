@@ -40,7 +40,7 @@ fn main() -> ExitCode {
     // };
 
     // Require a search argument
-    if args.search.len() == 0 {
+    if args.search.is_empty() {
         use clap::CommandFactory;
         let mut cmd = Args::command();
         cmd.print_help().unwrap();

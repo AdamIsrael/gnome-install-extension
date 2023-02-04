@@ -1,6 +1,6 @@
-use crate::Args;
 use crate::gnome;
 use crate::search;
+use crate::Args;
 
 use std::fs;
 use std::fs::File;
@@ -8,12 +8,10 @@ use std::io::{copy, Cursor};
 use std::path::{Path, PathBuf};
 use std::process;
 
-
 use dirs::home_dir;
 // use email_address::*;
 use regex::Regex;
 // use url::Url;
-
 
 /// Download a url to a temporary file
 pub fn download(url: String) -> Result<PathBuf, Box<dyn std::error::Error>> {
@@ -53,11 +51,11 @@ pub fn install(args: &Args) -> Result<String, Box<dyn std::error::Error>> {
     // If this appears to be a URL, open it and parse out the UUID
     if search.starts_with("http") {
         let uuid = get_uuid_by_url(&search)?;
-        search = uuid.to_owned();
+        search = uuid;
     }
 
     // Search extensions.gnome.org
-    let results = search::search(&search.as_str());
+    let results = search::search(search.as_str());
     match results {
         Ok(extensions) => {
             let extension = extensions.extensions.into_iter().next().unwrap();
@@ -70,9 +68,7 @@ pub fn install(args: &Args) -> Result<String, Box<dyn std::error::Error>> {
 
             if !args.dry_run {
                 let download_url = format!(
-                    "https://extensions.gnome.org/download-extension/{}.shell-extension.zip?version_tag={}",
-                    uuid,
-                    pk
+                    "https://extensions.gnome.org/download-extension/{uuid}.shell-extension.zip?version_tag={pk}",
                 );
 
                 match download(download_url) {
