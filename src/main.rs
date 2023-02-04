@@ -4,7 +4,7 @@ mod search;
 
 use std::process::ExitCode;
 
-use clap::{Parser, Subcommand};
+use clap::{Parser};
 use url::Url;
 
 #[derive(Parser)]
@@ -20,18 +20,6 @@ struct Args {
 
     /// The URL to the extension on extensions.gnome.org
     url: String,
-}
-
-#[derive(Subcommand)]
-enum Commands {
-    /// Install an extension
-    Install { url: String },
-
-    /// Search extensions by keyword
-    Search {
-        keywords: String,
-        shell: Option<i32>,
-    },
 }
 
 fn main() -> ExitCode {
@@ -53,8 +41,8 @@ fn main() -> ExitCode {
             if !args.quiet {
                 println!("Please restart your gnome-session.");
             }
-            return ExitCode::SUCCESS;
+            ExitCode::SUCCESS
         }
-        Err(_error) => return ExitCode::FAILURE,
-    };
+        Err(_error) => ExitCode::FAILURE
+    }
 }

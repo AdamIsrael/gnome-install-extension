@@ -1,7 +1,6 @@
 use crate::gnome;
 use crate::search;
 
-use std::error::Error;
 use std::fs;
 use std::fs::File;
 use std::io::{copy, Cursor};
@@ -10,7 +9,6 @@ use std::process;
 
 use dirs::home_dir;
 use regex::Regex;
-use reqwest;
 
 /// Download a url to a temporary file
 pub fn download(url: String) -> Result<PathBuf, Box<dyn std::error::Error>> {
@@ -54,7 +52,7 @@ pub fn install(url: String) -> Result<String, Box<dyn std::error::Error>> {
     let results = search::search(uuid.to_string());
     match results {
         Ok(extensions) => {
-            let extension = extensions.extensions.into_iter().nth(0).unwrap();
+            let extension = extensions.extensions.into_iter().next().unwrap();
             let pk = extension
                 .shell_version_map
                 .get(gnome_shell_version.to_string().as_str())
@@ -72,22 +70,22 @@ pub fn install(url: String) -> Result<String, Box<dyn std::error::Error>> {
                     // Unzip the file to ~/.local/share/gnome-shell/extensions/{uuid}, i.e.
                     // ~/.local/share/gnome-shell/extensions/gsconnect@andyholmes.github.io
                     match install_zip(dest, &uuid) {
-                        Ok(_ok) => println!("Extension {:?} installed successfully.", uuid),
-                        Err(e) => panic!("Unable to install zip file: {:?}", e),
+                        Ok(_ok) => println!("Extension {uuid:?} installed successfully."),
+                        Err(e) => panic!("Unable to install zip file: {e:?}"),
                     }
 
                     // enable_extension(extension.uuid);
                 }
                 Err(error) => {
-                    panic!("Error: {}", error)
+                    panic!("Error: {error}")
                 }
             }
         }
         Err(error) => {
-            panic!("Error searching extensions.gnome.org: {:?}", error)
+            panic!("Error searching extensions.gnome.org: {error:?}")
         }
     }
-    Ok(uuid.to_string())
+    Ok(uuid)
 }
 
 /// Get the extension's UUID from it's homepage
@@ -101,7 +99,7 @@ fn get_uuid_by_url(url: &str) -> Result<String, Box<dyn std::error::Error>> {
         caps.get(1).unwrap().as_str().to_owned()
     };
 
-    Ok(uuid.clone().to_string())
+    Ok(uuid)
 }
 
 /// Install an extension via zip file
@@ -117,8 +115,8 @@ fn install_zip(path: PathBuf, uuid: &str) -> Result<(), Box<dyn std::error::Erro
         let outpath = match file.enclosed_name() {
             Some(path) => Path::new(&home_dir().unwrap())
                 .join(Path::new(".local/share/gnome-shell/extensions"))
-                .join(uuid.to_owned())
-                .join(path.to_owned()),
+                .join(uuid)
+                .join(path),
             None => continue,
         };
 
