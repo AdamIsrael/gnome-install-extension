@@ -9,9 +9,7 @@ use std::path::{Path, PathBuf};
 use std::process;
 
 use dirs::home_dir;
-// use email_address::*;
 use regex::Regex;
-// use url::Url;
 
 /// Download a url to a temporary file
 pub fn download(url: String) -> Result<PathBuf, Box<dyn std::error::Error>> {

@@ -10,7 +10,7 @@ pub fn get_shell_version() -> Result<i32, Box<dyn std::error::Error>> {
         Command::new("gnome-shell")
             .args(["--version"])
             .output()
-            .expect("failed to execute process")
+            .expect("Can't find gnome-shell in path")
     } else {
         panic!("Only Linux is supported.")
     };
