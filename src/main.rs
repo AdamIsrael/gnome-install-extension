@@ -4,7 +4,7 @@ mod search;
 
 use std::process::ExitCode;
 
-use clap::{Parser};
+use clap::Parser;
 use url::Url;
 
 #[derive(Parser)]
@@ -43,6 +43,6 @@ fn main() -> ExitCode {
             }
             ExitCode::SUCCESS
         }
-        Err(_error) => ExitCode::FAILURE
+        Err(_error) => ExitCode::FAILURE,
     }
 }
