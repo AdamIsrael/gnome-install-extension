@@ -1,3 +1,4 @@
+use crate::Args;
 use crate::gnome;
 use crate::search;
 
@@ -7,8 +8,12 @@ use std::io::{copy, Cursor};
 use std::path::{Path, PathBuf};
 use std::process;
 
+
 use dirs::home_dir;
+// use email_address::*;
 use regex::Regex;
+// use url::Url;
+
 
 /// Download a url to a temporary file
 pub fn download(url: String) -> Result<PathBuf, Box<dyn std::error::Error>> {
@@ -36,44 +41,55 @@ pub fn download(url: String) -> Result<PathBuf, Box<dyn std::error::Error>> {
     Ok(dest)
 }
 
-/// Install a GNOME extension from url
-pub fn install(url: String) -> Result<String, Box<dyn std::error::Error>> {
+/// Install a GNOME extension from url, uuid, or keywords
+pub fn install(args: &Args) -> Result<String, Box<dyn std::error::Error>> {
     let gnome_shell_version = gnome::get_shell_version()?;
     if 0 == gnome_shell_version {
         panic!("Couldn't determine GNOME shell version.");
     }
+    let uuid: String;
+    let mut search: String = args.search.join(" ");
 
-    let uuid = get_uuid_by_url(&url)?;
+    // If this appears to be a URL, open it and parse out the UUID
+    if search.starts_with("http") {
+        let uuid = get_uuid_by_url(&search)?;
+        search = uuid.to_owned();
+    }
 
-    // Search by uuid
-    let results = search::search(&uuid);
+    // Search extensions.gnome.org
+    let results = search::search(&search.as_str());
     match results {
         Ok(extensions) => {
             let extension = extensions.extensions.into_iter().next().unwrap();
+            uuid = extension.uuid;
             let pk = extension
                 .shell_version_map
                 .get(gnome_shell_version.to_string().as_str())
                 .unwrap()
                 .pk;
-            // extension.
-            let download_url = format!(
-                "https://extensions.gnome.org/download-extension/{}.shell-extension.zip?version_tag={}",
-                extension.uuid,
-                pk
-            );
 
-            match download(download_url) {
-                Ok(dest) => {
-                    // Unzip the file to ~/.local/share/gnome-shell/extensions/{uuid}, i.e.
-                    // ~/.local/share/gnome-shell/extensions/gsconnect@andyholmes.github.io
-                    match install_zip(dest, &uuid) {
-                        Ok(_ok) => println!("Extension {uuid:?} installed successfully."),
-                        Err(e) => panic!("Unable to install zip file: {e:?}"),
+            if !args.dry_run {
+                let download_url = format!(
+                    "https://extensions.gnome.org/download-extension/{}.shell-extension.zip?version_tag={}",
+                    uuid,
+                    pk
+                );
+
+                match download(download_url) {
+                    Ok(dest) => {
+                        // Unzip the file to ~/.local/share/gnome-shell/extensions/{uuid}, i.e.
+                        // ~/.local/share/gnome-shell/extensions/gsconnect@andyholmes.github.io
+                        match install_zip(dest, &uuid) {
+                            Ok(_ok) => println!("Extension {uuid:?} installed successfully."),
+                            Err(e) => panic!("Unable to install zip file: {e:?}"),
+                        }
+                    }
+                    Err(error) => {
+                        panic!("Error: {error}")
                     }
                 }
-                Err(error) => {
-                    panic!("Error: {error}")
-                }
+            } else {
+                println!("Skipping installation of {uuid:?}. (dry-run)")
             }
         }
         Err(error) => {
