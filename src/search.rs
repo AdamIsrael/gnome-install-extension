@@ -30,7 +30,7 @@ pub struct Extensions {
 }
 
 /// Search extensions.gnome.org by keyword
-pub fn search(keywords: String) -> Result<Extensions, Box<dyn std::error::Error>> {
+pub fn search(keywords: &str) -> Result<Extensions, Box<dyn std::error::Error>> {
     let url = format!(
         "https://extensions.gnome.org/extension-query/?search={}&sort=popularity&shell_version={}&page={}",
         keywords,

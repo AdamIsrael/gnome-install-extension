@@ -31,10 +31,8 @@ pub fn download(url: String) -> Result<PathBuf, Box<dyn std::error::Error>> {
 
         let mut content = Cursor::new(response.bytes()?);
         copy(&mut content, &mut fh)?;
-
         fname
     };
-
     Ok(dest)
 }
 
@@ -42,14 +40,13 @@ pub fn download(url: String) -> Result<PathBuf, Box<dyn std::error::Error>> {
 pub fn install(url: String) -> Result<String, Box<dyn std::error::Error>> {
     let gnome_shell_version = gnome::get_shell_version()?;
     if 0 == gnome_shell_version {
-        // return Err(std::fmt::Error("asdf"));
         panic!("Couldn't determine GNOME shell version.");
     }
 
     let uuid = get_uuid_by_url(&url)?;
 
     // Search by uuid
-    let results = search::search(uuid.to_string());
+    let results = search::search(&uuid);
     match results {
         Ok(extensions) => {
             let extension = extensions.extensions.into_iter().next().unwrap();
@@ -73,8 +70,6 @@ pub fn install(url: String) -> Result<String, Box<dyn std::error::Error>> {
                         Ok(_ok) => println!("Extension {uuid:?} installed successfully."),
                         Err(e) => panic!("Unable to install zip file: {e:?}"),
                     }
-
-                    // enable_extension(extension.uuid);
                 }
                 Err(error) => {
                     panic!("Error: {error}")
@@ -135,20 +130,3 @@ fn install_zip(path: PathBuf, uuid: &str) -> Result<(), Box<dyn std::error::Erro
 
     Ok(())
 }
-
-// fn enable_extension(uuid: String) -> Result<(), Box<dyn std::error::Error>> {
-
-//     let output = if cfg!(target_os = "linux") {
-//         Command::new("gnome-extensions")
-//                 .args(["enable", uuid.as_str()])
-//                 .output()
-//                 .expect("failed to execute process")
-//     } else {
-//         panic!("Only Linux is supported.")
-//     };
-
-//     let tmp = String::from_utf8(output.stdout).unwrap();
-//     println!("Output: {}", tmp);
-
-//     Ok(())
-// }
