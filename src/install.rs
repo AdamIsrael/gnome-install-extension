@@ -74,7 +74,10 @@ pub fn install(args: &Args) -> Result<String, Box<dyn std::error::Error>> {
                         // Unzip the file to ~/.local/share/gnome-shell/extensions/{uuid}, i.e.
                         // ~/.local/share/gnome-shell/extensions/gsconnect@andyholmes.github.io
                         match install_zip(dest, &uuid) {
-                            Ok(_ok) => println!("Extension {uuid:?} installed successfully."),
+                            Ok(_ok) => {
+                                gnome::enable_extension(&uuid);
+                                println!("Extension {uuid:?} successfully installed and enabled.")
+                            }
                             Err(e) => panic!("Unable to install zip file: {e:?}"),
                         }
                     }
