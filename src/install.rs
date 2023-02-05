@@ -77,7 +77,9 @@ pub fn install(args: &Args) -> Result<String, Box<dyn std::error::Error>> {
                             Ok(_ok) => {
                                 gnome::enable_extension(&uuid);
                                 if !args.quiet {
-                                    println!("Extension {uuid:?} successfully installed and enabled.")
+                                    println!(
+                                        "Extension {uuid:?} successfully installed and enabled."
+                                    )
                                 }
                             }
                             Err(e) => panic!("Unable to install zip file: {e:?}"),
@@ -87,10 +89,8 @@ pub fn install(args: &Args) -> Result<String, Box<dyn std::error::Error>> {
                         panic!("Error: {error}")
                     }
                 }
-            } else {
-                if !args.quiet {
-                    println!("Skipping installation of {uuid:?}. (dry-run)")
-                }
+            } else if !args.quiet {
+                println!("Skipping installation of {uuid:?}. (dry-run)")
             }
         }
         Err(error) => {
